@@ -5,6 +5,9 @@ import sys
 import os
 from datetime import datetime
 
+# Fixer le nom du ou des comptes dont les profils doivent etre
+# nettoyes
+# TODO
 USER = 'Invité'
 
 def renvoieDate(tstamp):
@@ -49,3 +52,5 @@ if __name__ == '__main__':
               format(createdossier, modifdossier, accessdossier,))
             print('sous-dossiers : {}\nfichiers : {}'.
               format(dossier, sousdossiers, fichiers))
+	
+    # TO BE CONTINUED...
