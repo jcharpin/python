@@ -19,7 +19,8 @@ from zipfile import ZipFile
 #import cgitb
 #cgitb.enable(format='text')
 
-USER = 'moi'
+REP_BASE = os.path.join("c:", os.sep, "Users")
+REP_ARCHIVES = os.path.join("c:", os.sep, "DOSI", "archives")
 
 def syntax():
     pass
@@ -30,6 +31,19 @@ def cmd_line(args):
 def renvoieDate(tstamp):
     """Renvoyer un objet datetime depuis un timestamp"""
     return datetime.fromtimestamp(tstamp)
+
+def renvoieReps(dir):
+    """Renvoyer les repertoires a partir d'un emplacement"""
+    # Verifier si l'emplacement est un repertoire
+    try:
+        with os.scandir(dir) as it:
+            for entry in it:
+                if entry.is_dir():
+                    yield entry.name
+    # sinon afficher erreur (logs + ...)
+    except NotADirectoryError:
+        # Renvoyer vers logs + affichage fenetre erreur arret poste !
+        pass
 
 if __name__ == '__main__':
 
@@ -142,10 +156,10 @@ if __name__ == '__main__':
         # (nomprofil_date.zip)
         # le nom...
         f_archive = os.path.join("c:", os.sep, "temp", USER + 
-                str(m.year) + str(m.month) + str(m.day) + str(m.hour) + 
+                str(m.year) + str(m.month) + str(m.day) + '_' + str(m.hour) + 
                 str(m.minute) + str(m.second) + ".zip")
     
-        # ... le fichier lui-meme.
+        # ... le fichier lui-meme
         try:
             f = open(f_archive, 'w') 
         except:
@@ -158,4 +172,29 @@ if __name__ == '__main__':
         for f in fichiers_deja_identif:
             with ZipFile(f_archive, 'a') as myzip:
                 myzip.write(f)
+            try:
+                os.remove(f)
+            except:
+                print("Impossible de supprimer : {}".
+                        format(f)
+                )
 
+    if flag_dossier:
+        # On archive les dossiers...
+        for d in dossiers_deja_identif:
+            for dossier, sousdossiers, fichiers in os.walk(
+                    d, topdown=True
+            ):
+                # ... en ajoutant les fichiers de chaque dossier 
+                # a l'archive
+                for f in fichiers:
+                    fabs = os.path.join(dossier, f)
+                    with ZipFile(f_archive, 'a') as myzip:
+                        myzip.write(fabs)
+            # Suppression dossier apres os.walk()
+            try:
+                shutil.rmtree(d)
+            except:
+                print("Impossible de supprimer le repertoire : {}".
+                        format(d)
+                )
